@@ -1,0 +1,3 @@
+Salut, ce projet c'est une version 2d de minecraft.
+Cette version a pour but d'aider un ami à apprendre la programmation de manière ludique, c'est vrai: quoi de mieu qu'un jeu vidéo pour apprendre dans le fun?
+Je suis nouveau sur github donc m'insulte pas si je fais de la mrd stp...
