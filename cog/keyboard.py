@@ -15,7 +15,7 @@ class Keyboard:
     def release(self, key):
         for pressed_key in self.keys:
             if key in pressed_key:
-                self.keys.pop(pressed_key)
+                self.keys.remove(pressed_key)
 
     def reset(self):
         self.keys = []

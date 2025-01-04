@@ -1,7 +1,7 @@
 import pygame
 
 class Entity:
-    def __init__(self, type, health, total_health, coos, momentum, state, total_states, size, on_spawn, on_death, on_damage):
+    def __init__(self, type, health, total_health, coos, momentum, state, total_states, size, data, on_spawn, on_death, on_damage):
         self.type = type
         self.heath = health
         self.total_health = total_health
@@ -10,6 +10,7 @@ class Entity:
         self.state = state
         self.total_states = total_states
         self.size = size
+        self.data = data
         self.on_death = on_death
         self.on_damage = on_damage
         on_spawn()

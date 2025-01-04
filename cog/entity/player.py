@@ -2,9 +2,10 @@ from cog.classes.entity import Entity
 from cog.basic_settings import player_size
 import pygame
 
+
 class Player(Entity):
     def __init__(self, coos):
-        super().__init__("player", 20, 20, coos, [0, 0], 0, 10, player_size, lambda: None, lambda: None, lambda: None)
+        super().__init__("player", 20, 20, coos, [0, 0], 0, 10, player_size, {}, lambda: None, lambda: None, lambda: None)
 
     def draw(self, screen, fast_entity_images, camera):
         if not f"{self.type}_{self.state}" in fast_entity_images:

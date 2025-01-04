@@ -5,3 +5,5 @@ chunk_y = -2500
 max_falling_speed = 100
 load_from_save = False
 seed = 27836.1
+player_speed = 10
+player_jump_momentum = 10
