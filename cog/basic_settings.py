@@ -6,4 +6,6 @@ max_falling_speed = 100
 load_from_save = False
 seed = 27836.1
 player_speed = 10
+player_sprint_speed = 5
 player_jump_momentum = 10
+player_ground_slow = 3

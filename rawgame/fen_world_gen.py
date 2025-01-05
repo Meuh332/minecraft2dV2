@@ -51,11 +51,12 @@ while running:
         except:
             pass
 
+
     if keyboard.pressed("a"):
-        player.momentum[0] = min(player_speed * -1, player.momentum[0] * -1)
+        player.momentum[0] = min(player_speed * -1 + (player_ground_slow if player.data.get("on_the_ground") else 0) - (player_sprint_speed if keyboard.pressed(pygame.K_LSHIFT) else 0), player.momentum[0] * -1)
 
     if keyboard.pressed("d"):
-        player.momentum[0] = max(player_speed, player.momentum[0])
+        player.momentum[0] = max(player_speed - (player_ground_slow if player.data.get("on_the_ground") else 0) + (player_sprint_speed if keyboard.pressed(pygame.K_LSHIFT) else 0), player.momentum[0])
 
     if keyboard.pressed(pygame.K_SPACE):
         if player.data["on_the_ground"]:
@@ -78,7 +79,6 @@ while running:
         if not current_chunk.chunk_coos in displayed_chunk:
             current_chunk.draw(screen, (current_chunk.chunk_coos * chunk_size * block_size, chunk_y))
             displayed_chunk.append(current_chunk.chunk_coos)
-        print(current_chunk.chunk_coos)
 
 
     fast_entity_images, player_rect = player.draw(screen, fasts.fast_entity_images, camera)

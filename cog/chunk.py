@@ -76,11 +76,7 @@ class Chunk:
                             fast.fast_static_image[block_type] = block_front_image
                         else:
                             block_front_image = fast.fast_static_image[block_type]
-                        screen.blit(block_front_image, (
-                        (chunk_pos[0] + x * block_size) + camera.x, (chunk_pos[1] + y * block_size) + camera.y))
-                        if block_type == "grass_block":
-                            # print(chunk_pos[1] + y * block_size)
-                            pass
+                        screen.blit(block_front_image, ((chunk_pos[0] + x * block_size) + camera.x, (chunk_pos[1] + y * block_size) + camera.y))
 
     @staticmethod
     def chunk_by_x(x, seed, get_object=False):
