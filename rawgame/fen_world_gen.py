@@ -8,11 +8,14 @@ from cog.main_objects import camera, keyboard, instant_keyboard
 import cog.fasts as fasts
 from cog.chunk import Chunk
 import math
+import cog.debug_options as debug
 pygame.init()
 
 
 screen = pygame.display.set_mode((1080, 500))
 screen_width = screen.get_width()
+player_max_right = screen_width // 3 * 2
+player_max_left = screen_width // 3
 pygame.display.set_caption("minecraft 2D")
 
 
@@ -26,7 +29,6 @@ running = True
 fps_history = deque(maxlen=50)
 pos = (0, 0)
 entity_list = []
-
 
 player = Player([functions.x_by_x_co(16), functions.y_by_y_co(35)])
 entity_list.append(player)
@@ -59,12 +61,24 @@ while running:
         if player.data["on_the_ground"]:
             player.momentum[1] -= player_jump_momentum
 
+
+    if player.coos[0] > player_max_right:
+        camera._x += player.coos[0] - player_max_right
+        player.coos[0] = player_max_right
+
+    if player.coos[0] < player_max_left:
+        camera._x -= player_max_left - player.coos[0]
+        player.coos[0] = player_max_left
+
+
     displayed_chunk = []
-    for chunk_step in range(screen_chunk_split):
-        current_chunk = Chunk.chunk_by_x(screen_chunk_split * chunk_step, seed, True)
+    for chunk_step in range(screen_chunk_split + 1):
+        chunk_x = chunk_size * block_size * chunk_step
+        current_chunk = Chunk.chunk_by_x(chunk_x if chunk_x < screen_width else screen_width, seed, True)
         if not current_chunk.chunk_coos in displayed_chunk:
-            current_chunk.draw(screen, (0, chunk_y))
+            current_chunk.draw(screen, (current_chunk.chunk_coos * chunk_size * block_size, chunk_y))
             displayed_chunk.append(current_chunk.chunk_coos)
+        print(current_chunk.chunk_coos)
 
 
     fast_entity_images, player_rect = player.draw(screen, fasts.fast_entity_images, camera)
@@ -78,15 +92,17 @@ while running:
             colliders = []
 
             bottom_y = math.ceil(entity.size[1] / block_size) if entity.momentum[1] >= 0 else -1
-            colliders.append([pygame.Rect(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y), block_size, block_size), functions.get_block_by_xy(Chunk.chunk_by_x(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), seed, True), (functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y)))])
-            for step in range(math.ceil(entity.size[0] / block_size)):
+            # colliders.append([pygame.Rect(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y), block_size, block_size), functions.get_block_by_xy(Chunk.chunk_by_x(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), seed, True), (functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y)))])
+            for step in range(-1, math.ceil(entity.size[0] / block_size) + 1):
                 colliders.append([pygame.Rect(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) + step), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y), block_size, block_size), functions.get_block_by_xy(Chunk.chunk_by_x(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) + step), seed, True), (functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) + step), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y)))])
 
             entity.coos[1] += 1 if entity.momentum[1] >= 0 else -1
             collide = False
             for collider, block in colliders:
-                # pygame.draw.rect(screen, 0, pygame.Rect((functions.x_by_x_co(block.coos[0]), functions.y_by_y_co(block.coos[1])), (block_size, block_size)))
-                if not block.typed == "air":
+                if debug.colliders:
+                    pygame.draw.rect(screen, (255, 0, 0), entity_bottom)
+                    pygame.draw.rect(screen, 0, collider)
+                if not block.type == "air":
                     if entity_bottom.colliderect(collider):
                         collide = True
             if collide:
@@ -96,8 +112,9 @@ while running:
                 break
 
         else:
-            if not entity.momentum[1] > max_falling_speed:
-                entity.momentum[1] += 1
+            if not entity.data.get("on_the_ground"):
+                if not entity.momentum[1] > max_falling_speed:
+                    entity.momentum[1] += 1
 
         for momentum in range(0, entity.momentum[0], 1 if entity.momentum[0] >= 0 else -1):
             entity.coos[0] += 1 if entity.momentum[0] >= 0 else -1
@@ -106,15 +123,16 @@ while running:
             colliders = []
 
             side_x = math.ceil(entity.size[0] / block_size) if entity.momentum[0] >= 0 else -1
-            colliders.append([pygame.Rect(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y), block_size, block_size), functions.get_block_by_xy(Chunk.chunk_by_x(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), seed, True), (functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - 1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - bottom_y)))])
-            for step in range(math.ceil(entity.size[0] / block_size) + 1):
+            # colliders.append([pygame.Rect(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - side_x * -1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - 1), block_size, block_size), functions.get_block_by_xy(Chunk.chunk_by_x(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - side_x * -1), seed, True), (functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) - side_x * -1), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - 1)))])
+            for step in range(math.ceil(entity.size[0] / block_size) + 2):
                 colliders.append([pygame.Rect(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) + side_x), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - step), block_size, block_size), functions.get_block_by_xy(Chunk.chunk_by_x(functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) + side_x), seed, True), (functions.x_by_x_co(functions.x_co_by_x(entity.coos[0]) + side_x), functions.y_by_y_co(functions.y_co_by_y(entity.coos[1]) - step)))])
 
             entity.coos[0] += 1 if entity.momentum[0] >= 0 else -1
             collide = False
             for collider, block in colliders:
-                pygame.draw.rect(screen, 0, collider)
-                pygame.draw.rect(screen, 255, entity_side)
+                if debug.colliders:
+                    pygame.draw.rect(screen, 0, collider)
+                    pygame.draw.rect(screen, 255, entity_side)
                 if not block.type == "air":
                     if entity_side.colliderect(collider):
                         collide = True
@@ -125,7 +143,10 @@ while running:
 
         else:
             if not entity.momentum[0] == 0:
-                entity.momentum[0] -= 1 if entity.momentum[0] >= 0 else -1
+                if entity.data.get("on_the_ground"):
+                    entity.momentum[0] = 0
+                else:
+                    entity.momentum[0] -= 1 if entity.momentum[0] >= 0 else -1
 
     elapsed_time = time.time() - start
     current_fps = 1 / elapsed_time if elapsed_time > 0 else 0

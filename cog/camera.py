@@ -6,6 +6,9 @@ class Camera:
     def __repr__(self):
         return self.x, self.y
 
+    def __str__(self):
+        return f"x: {self.x} y: {self.y}"
+
     @property
     def x(self):
         return self._x * -1
